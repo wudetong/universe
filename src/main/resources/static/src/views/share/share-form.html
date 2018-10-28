@@ -1,0 +1,29 @@
+<div class="layui-form" lay-filter="share-form" id="share-form" style="padding: 20px 30px 0 0;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">标题</label>
+        <div class="layui-input-inline">
+            <script type="text/html" template>
+                <input type="text" name="shareTitle" value="{{ d.params.shareTitle || '' }}" lay-verify="required"
+                       placeholder="请输入" autocomplete="off" class="layui-input">
+            </script>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">地址</label>
+        <div class="layui-input-inline">
+            <script type="text/html" template>
+                <input type="text" name="shareUrl" value="{{ d.params.shareUrl || '' }}" lay-verify="required"
+                       placeholder="请输入" autocomplete="off" class="layui-input">
+            </script>
+        </div>
+    </div>
+    <script type="text/html" template>
+        <input type="hidden" name="shareId" value="{{ d.params.shareId || '' }}">
+    </script>
+    <div class="layui-form-item">
+        <label class="layui-form-label"></label>
+        <div class="layui-input-inline">
+            <input type="button" lay-submit lay-filter="share-form-submit" value="确认" class="layui-btn">
+        </div>
+    </div>
+</div>

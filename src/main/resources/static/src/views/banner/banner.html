@@ -1,0 +1,100 @@
+<title>用户列表</title>
+<div class="layui-card layadmin-header">
+	<div class="layui-breadcrumb" lay-filter="breadcrumb">
+		<a lay-href="">主页</a>
+		<a>
+			<cite>用户管理</cite>
+		</a>
+		<a>
+			<cite>用户管理</cite>
+		</a>
+	</div>
+</div>
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<table id="LAY-banner-banner" lay-filter="LAY-banner-banner"></table>
+			<script type="text/html" id="table-banner-banner">
+				<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+				<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-del"></i>删除</a>
+			</script>
+		</div>
+	</div>
+</div>
+<script>
+	function previewImg(obj) {
+		var img = new Image();
+		img.src = obj.src;
+		var imgHtml = "<img src='" + obj.src + "' width='500px' height='500px'/>";
+		//弹出层
+		layer.open({
+			type : 1,
+			shade : 0.8,
+			offset : 'auto',
+			area : [ 500 + 'px', 550 + 'px' ],
+			shadeClose : true,
+			scrollbar : false,
+			title : "图片预览", //不显示标题
+			content : imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
+			cancel : function() {
+				//layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });
+			}
+		});
+	}
+	layui.use('banner', layui.factory('banner')).use(['admin', 'banner', 'table'],
+			function() {
+			    var $ = layui.$,
+			    admin = layui.admin,
+			    view = layui.view,
+			    table = layui.table,
+			    form = layui.form;
+			    form.render(null, 'layadmin-banner-form');
+			    //监听搜索
+			    form.on('submit(LAY-banner-back-search)',
+			    function(data) {
+			        var field = data.field;
+			        console.log(field)
+			        //执行重载
+			        table.reload('LAY-banner-banner', {
+			            method: "post",
+			            url: "/searchWkbanner",
+			            where: field
+			        });
+			    });
+                //事件
+                var active = {
+                    add: function () {
+                        admin.popup({
+                            title: '添加技能'
+                            , area: ['550px', '550px']
+                            , success: function (layero, index) {
+                                view(this.id).render('banner/banner-form').done(function () {
+                                    //监听提交
+                                    form.on('submit(banner-form-submit)', function (data) {
+                                        var field = data.field; //获取提交的字段
+                                        console.log(field)
+                                        $.ajax({
+                                            type: "POST", //请求方式 post
+                                            dataType: 'json', //数据类型 json
+                                            contentType: "application/json; charset=utf-8",
+                                            url: "/addWkbanner", // 请求地址
+                                            data: JSON.stringify(field), //请求附带参数
+                                            success: function (data) {
+                                                console.log(data)
+                                                layui.table.reload('LAY-banner-banner'); //重载表格
+                                                layer.close(index); //执行关闭
+                                            }
+                                        });
+
+                                    });
+                                });
+                            }
+                        });
+                    }
+                }
+			    $('.layui-btn.banner-form').on('click', function() {var type = $(this).data('type');
+			        active[type] ? active[type].call(this) : '';
+			    });
+			});
+</script>
+

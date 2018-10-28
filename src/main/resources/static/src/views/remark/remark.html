@@ -1,0 +1,138 @@
+<title>用户列表</title>
+<div class="layui-card layadmin-header">
+	<div class="layui-breadcrumb" lay-filter="breadcrumb">
+		<a lay-href="">主页</a>
+		<a>
+			<cite>用户管理</cite>
+		</a>
+		<a>
+			<cite>用户管理</cite>
+		</a>
+	</div>
+</div>
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<div class="layui-form layui-card-header layuiadmin-card-header-auto" lay-filter="layadmin-remark-form">
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label">用户ID</label>
+						<div class="layui-input-block">
+							<input type="text" name="keywords" placeholder="请输入" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-inline">
+						<button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="LAY-remark-back-search">
+							<i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+			<table id="LAY-remark-remark" lay-filter="LAY-remark-remark"></table>
+			<script type="text/html" id="table-remark-remark">
+				<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-del"></i>删除</a>
+			</script>
+			<script type="text/html" id="Img0">
+				<img style="display: inline-block; width: 33px; height: 33px;" src=http://172.16.1.233:8080/{{ d.remarkImgPic0 }} onclick="previewImg(this)">
+			</script>
+			<script type="text/html" id="Video">
+				<img src="http://172.16.1.233:8080/{{ d.remarkVideoPic }}" controls="controls" onclick="previewVideo(this)">
+			</script>
+		</div>
+	</div>
+</div>
+<script>
+	function previewImg(obj) {
+		var img = new Image();
+		img.src = obj.src;
+		var imgHtml = "<img src='" + obj.src + "' width='500px' height='500px'/>";
+		//弹出层
+		layer.open({
+			type : 1,
+			shade : 0.8,
+			offset : 'auto',
+			area : [ 500 + 'px', 550 + 'px' ],
+			shadeClose : true,
+			scrollbar : false,
+			title : "图片预览", //不显示标题
+			content : imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
+			cancel : function() {
+				//layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });
+			}
+		});
+	}
+    function previewVideo(obj) {
+        var imgHtml = "<video src='" + obj.src + "' controls='controls' autoplay='autoplay' width='500px' height='500px'/> </video>";
+        //弹出层
+        layer.open({
+            type : 1,
+            shade : 0.8,
+            offset : 'auto',
+            area : [ 500 + 'px', 550 + 'px' ],
+            shadeClose : true,
+            scrollbar : false,
+            title : "视频预览", //不显示标题
+            content : imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
+            cancel : function() {
+                //layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });
+            }
+        });
+    }
+	layui.use('remark', layui.factory('remark')).use(['admin', 'remark', 'table'],
+			function() {
+			    var $ = layui.$,
+			    admin = layui.admin,
+			    view = layui.view,
+			    table = layui.table,
+			    form = layui.form;
+
+			    form.render(null, 'layadmin-remark-form');
+			    //监听搜索
+			    form.on('submit(LAY-remark-back-search)',
+			    function(data) {
+			        var field = data.field;
+			        console.log(field)
+			        //执行重载
+			        table.reload('LAY-remark-remark', {
+			            method: "post",
+			            url: "/searchWkremark",
+			            where: field
+			        });
+			    });
+                //事件
+                var active = {
+                    add: function () {
+                        admin.popup({
+                            title: '添加技能'
+                            , area: ['550px', '550px']
+                            , success: function (layero, index) {
+                                view(this.id).render('remark/remark-form').done(function () {
+                                    //监听提交
+                                    form.on('submit(remark-form-submit)', function (data) {
+                                        var field = data.field; //获取提交的字段
+                                        console.log(field)
+                                        $.ajax({
+                                            type: "POST", //请求方式 post
+                                            dataType: 'json', //数据类型 json
+                                            contentType: "application/json; charset=utf-8",
+                                            url: "/addWkremark", // 请求地址
+                                            data: JSON.stringify(field), //请求附带参数
+                                            success: function (data) {
+                                                console.log(data)
+                                                layui.table.reload('LAY-remark-remark'); //重载表格
+                                                layer.close(index); //执行关闭
+                                            }
+                                        });
+
+                                    });
+                                });
+                            }
+                        });
+                    }
+                }
+			    $('.layui-btn.remark-form').on('click', function() {var type = $(this).data('type');
+			        active[type] ? active[type].call(this) : '';
+			    });
+			});
+</script>
+

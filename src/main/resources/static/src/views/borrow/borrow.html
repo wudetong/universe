@@ -1,0 +1,89 @@
+<title>用户列表</title>
+<div class="layui-card layadmin-header">
+	<div class="layui-breadcrumb" lay-filter="breadcrumb">
+		<a lay-href="">主页</a>
+		<a>
+			<cite>用户管理</cite>
+		</a>
+		<a>
+			<cite>借款信息</cite>
+		</a>
+	</div>
+</div>
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<table id="LAY-borrow-borrow" lay-filter="LAY-borrow-borrow"></table>
+			<script type="text/html" id="Status">
+				{{#  if(d.borrowState==0){           }}
+				<button class="layui-btn layui-btn-warm layui-btn-xs">审核中</button>
+				{{#  }else if(d.borrowState==1){     }}
+				<button class="layui-btn layui-btn-normal layui-btn-xs">已通过</button>
+				{{#       }else{                          }}
+				<button class="layui-btn layui-btn-danger layui-btn-xs">未通过</button>
+				{{#       }                  }}
+			</script>
+			<script type="text/html" id="table-borrow-borrow">
+				<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			</script>
+		</div>
+	</div>
+</div>
+<script>
+	layui.use('borrow', layui.factory('borrow')).use(['admin', 'borrow', 'table'],
+			function() {
+			    var $ = layui.$,
+			    admin = layui.admin,
+			    view = layui.view,
+			    table = layui.table,
+			    form = layui.form;
+			    form.render(null, 'layadmin-borrow-form');
+			    //监听搜索
+			    form.on('submit(LAY-borrow-back-search)',
+			    function(data) {
+			        var field = data.field;
+			        console.log(field)
+			        //执行重载
+			        table.reload('LAY-borrow-borrow', {
+			            method: "post",
+			            url: "/searchWkborrow",
+			            where: field
+			        });
+			    });
+                //事件
+                var active = {
+                    add: function () {
+                        admin.popup({
+                            title: '添加技能'
+                            , area: ['550px', '550px']
+                            , success: function (layero, index) {
+                                view(this.id).render('borrow/borrow-form').done(function () {
+                                    //监听提交
+                                    form.on('submit(borrow-form-submit)', function (data) {
+                                        var field = data.field; //获取提交的字段
+                                        console.log(field)
+                                        $.ajax({
+                                            type: "POST", //请求方式 post
+                                            dataType: 'json', //数据类型 json
+                                            contentType: "application/json; charset=utf-8",
+                                            url: "/addWkborrow", // 请求地址
+                                            data: JSON.stringify(field), //请求附带参数
+                                            success: function (data) {
+                                                console.log(data)
+                                                layui.table.reload('LAY-borrow-borrow'); //重载表格
+                                                layer.close(index); //执行关闭
+                                            }
+                                        });
+
+                                    });
+                                });
+                            }
+                        });
+                    }
+                }
+			    $('.layui-btn.borrow-form').on('click', function() {var type = $(this).data('type');
+			        active[type] ? active[type].call(this) : '';
+			    });
+			});
+</script>
+
